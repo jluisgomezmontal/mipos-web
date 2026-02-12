@@ -52,6 +52,7 @@ export default function EditProductPage() {
 
   useEffect(() => {
     loadProduct()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id])
 
   const loadProduct = async () => {

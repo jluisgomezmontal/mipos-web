@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, ShoppingCart, Trash2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -16,6 +16,7 @@ import { saleService } from '@/services/sale.service'
 import { branchService } from '@/services/branch.service'
 import { getErrorMessage } from '@/lib/api-client'
 import { Branch } from '@/types/branch'
+import useF1 from '@/hooks/use-f1'
 
 export default function POSPage() {
   const router = useRouter()
@@ -27,6 +28,7 @@ export default function POSPage() {
   const [isLoadingBranches, setIsLoadingBranches] = useState(true)
   const [showPaymentDialog, setShowPaymentDialog] = useState(false)
   const [isProcessingSale, setIsProcessingSale] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     loadBranches()
@@ -117,7 +119,7 @@ export default function POSPage() {
   const clearCart = () => {
     setCart([])
   }
-
+  useF1(() => setShowPaymentDialog(true))
   const calculateTotals = () => {
     // El precio ya incluye IVA, por lo tanto:
     // total = precio con IVA
@@ -182,11 +184,11 @@ export default function POSPage() {
 
       clearCart()
       setShowPaymentDialog(false)
-
+      inputRef?.current?.focus()
       // Redirigir al historial de ventas
-      setTimeout(() => {
-        router.push('/dashboard/ventas/historial')
-      }, 1500)
+      // setTimeout(() => {
+      //   router.push('/dashboard/ventas/historial')
+      // }, 1500)
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -195,6 +197,7 @@ export default function POSPage() {
       })
     } finally {
       setIsProcessingSale(false)
+      inputRef?.current?.focus()
     }
   }
 
@@ -252,7 +255,7 @@ export default function POSPage() {
               <CardTitle>Buscar Producto</CardTitle>
             </CardHeader>
             <CardContent>
-              <ProductSearch onProductSelect={handleProductSelect} />
+              <ProductSearch onProductSelect={handleProductSelect} inputRef={inputRef} />
             </CardContent>
           </Card>
 

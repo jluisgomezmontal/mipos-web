@@ -51,6 +51,7 @@ export default function EditBranchPage() {
 
   useEffect(() => {
     loadBranch()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id])
 
   const loadBranch = async () => {

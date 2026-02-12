@@ -18,6 +18,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadDashboardStats()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loadDashboardStats = async () => {

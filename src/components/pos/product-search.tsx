@@ -11,13 +11,13 @@ import { useToast } from '@/hooks/use-toast'
 
 interface ProductSearchProps {
   onProductSelect: (product: Product, quantity?: number) => void
+  inputRef: React.RefObject<HTMLInputElement>
 }
 
-export function ProductSearch({ onProductSelect }: ProductSearchProps) {
+export function ProductSearch({ onProductSelect, inputRef }: ProductSearchProps) {
   const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [isSearching, setIsSearching] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
   const handleSearch = async () => {
     if (isSearching) return
 
