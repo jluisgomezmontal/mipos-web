@@ -42,12 +42,6 @@ const navItems: NavItem[] = [
     roles: ['OWNER', 'ADMIN', 'CASHIER'],
   },
   {
-    title: 'Productos',
-    href: '/dashboard/productos',
-    icon: Package,
-    roles: ['OWNER', 'ADMIN'],
-  },
-  {
     title: 'Ventas',
     href: '/dashboard/ventas',
     icon: ShoppingCart,
@@ -60,10 +54,16 @@ const navItems: NavItem[] = [
     roles: ['OWNER', 'ADMIN'],
   },
   {
+    title: 'Productos',
+    href: '/dashboard/productos',
+    icon: Package,
+    roles: ['OWNER', 'ADMIN'],
+  },
+  {
     title: 'Sucursales',
     href: '/dashboard/sucursales',
     icon: MapPin,
-    roles: ['OWNER', 'ADMIN'],
+    roles: ['OWNER'],
   },
   {
     title: 'Reportes',
@@ -75,13 +75,13 @@ const navItems: NavItem[] = [
     title: 'Usuarios',
     href: '/dashboard/usuarios',
     icon: Users,
-    roles: ['OWNER', 'ADMIN'],
+    roles: ['OWNER'],
   },
   {
     title: 'Configuración',
     href: '/dashboard/configuracion',
     icon: Settings,
-    roles: ['OWNER', 'ADMIN'],
+    roles: ['OWNER'],
   },
 ]
 
@@ -96,7 +96,7 @@ export function Sidebar() {
   )
 
   const currentTheme = resolvedTheme || theme || 'light'
-  const logoSrc = currentTheme === 'dark' ? '/images/icon d.png' : '/images/icon w.png'
+  const logoSrc = currentTheme !== 'dark' ? '/images/icon d.png' : '/images/icon.png'
 
   return (
     <aside 

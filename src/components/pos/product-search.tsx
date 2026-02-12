@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Search, Barcode } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -17,22 +17,24 @@ export function ProductSearch({ onProductSelect }: ProductSearchProps) {
   const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [isSearching, setIsSearching] = useState(false)
-
+  const inputRef = useRef<HTMLInputElement>(null)
   const handleSearch = async () => {
+    if (isSearching) return
+
     if (!searchTerm.trim()) return
 
     try {
       setIsSearching(true)
-      
+
       // Parsear cantidad si tiene formato: 5*SKU o 5*codigo
       let quantity = 1
       let productCode = searchTerm.trim()
-      
+
       const quantityMatch = searchTerm.match(/^(\d+)\*(.+)$/)
       if (quantityMatch) {
         quantity = parseInt(quantityMatch[1])
         productCode = quantityMatch[2].trim()
-        
+
         if (quantity <= 0) {
           toast({
             variant: 'destructive',
@@ -43,7 +45,7 @@ export function ProductSearch({ onProductSelect }: ProductSearchProps) {
           return
         }
       }
-      
+
       // Intentar buscar por código de barras primero
       try {
         const { product } = await productService.getProductByBarcode(productCode)
@@ -74,6 +76,9 @@ export function ProductSearch({ onProductSelect }: ProductSearchProps) {
       })
     } finally {
       setIsSearching(false)
+      setTimeout(() => {
+        inputRef.current?.focus()
+      }, 0)
     }
   }
 
@@ -88,13 +93,13 @@ export function ProductSearch({ onProductSelect }: ProductSearchProps) {
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
+          ref={inputRef}
           type="text"
           placeholder="Ej: 5*SKU123 o código de barras..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyPress}
           className="pl-10"
-          disabled={isSearching}
           autoFocus
         />
       </div>

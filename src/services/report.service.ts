@@ -47,4 +47,14 @@ export const reportService = {
     const response = await apiClient.get<PaymentMethodsReport>(`/reports/payment-methods?${params.toString()}`)
     return response.data!
   },
+
+  async getSalesByUser(filters: ReportFilters): Promise<any> {
+    const params = new URLSearchParams()
+    params.append('startDate', filters.startDate)
+    params.append('endDate', filters.endDate)
+    if (filters.branchId) params.append('branchId', filters.branchId)
+
+    const response = await apiClient.get(`/reports/sales-by-user?${params.toString()}`)
+    return response.data!
+  },
 }

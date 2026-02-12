@@ -30,6 +30,7 @@ import { inventoryMovementSchema, InventoryMovementFormData } from '@/lib/valida
 import { getErrorMessage } from '@/lib/api-client'
 import { Branch } from '@/types/branch'
 import { Product } from '@/types/product'
+import { MOTIVOS } from '@/lib/constants/motivos'
 
 interface InventoryMovementDialogProps {
   open: boolean
@@ -83,7 +84,7 @@ export function InventoryMovementDialog({
       const { product } = await productService.getProductBySku(searchSku)
       setSelectedProduct(product)
       form.setValue('productId', product._id)
-      
+
       toast({
         title: 'Producto encontrado',
         description: product.name,
@@ -113,7 +114,7 @@ export function InventoryMovementDialog({
 
     try {
       setIsLoading(true)
-      
+
       await inventoryService.createMovement(data)
 
       toast({
@@ -268,11 +269,17 @@ export function InventoryMovementDialog({
                 <FormItem>
                   <FormLabel>Motivo</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Ej: Compra de mercancía"
-                      disabled={isLoading}
+                    <select
                       {...field}
-                    />
+                      disabled={isLoading}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      {MOTIVOS.map((m, index) => (
+                        <option key={index} value={m}>
+                          {m}
+                        </option>
+                      ))}
+                    </select>
                   </FormControl>
                   <FormDescription>
                     Describe el motivo del movimiento

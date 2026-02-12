@@ -20,7 +20,8 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
     if (_hasHydrated && !isLoading && !isAuthenticated) {
       router.replace('/login')
     }
-  }, [isAuthenticated, isLoading, _hasHydrated, router])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, isLoading, _hasHydrated])
 
   // Mostrar loader mientras carga o mientras se hidrata el estado
   if (isLoading || !_hasHydrated) {

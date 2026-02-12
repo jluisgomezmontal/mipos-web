@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { format, subDays, startOfMonth, endOfMonth, addDays } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { Loader2, Calendar, TrendingUp, Package, Building2 } from 'lucide-react'
+import { Loader2, Calendar, TrendingUp, Package, Building2, Users } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,8 +17,9 @@ import { SalesReport, TopProductsReport, BranchRevenueReport } from '@/types/rep
 import { SalesReportView } from '@/components/reports/sales-report-view'
 import { TopProductsView } from '@/components/reports/top-products-view'
 import { BranchRevenueView } from '@/components/reports/branch-revenue-view'
+import { SalesByUserView } from '@/components/reports/sales-by-user-view'
 
-type ReportType = 'sales' | 'products' | 'branches'
+type ReportType = 'sales' | 'products' | 'branches' | 'users'
 
 export default function ReportsPage() {
   const { toast } = useToast()
@@ -30,12 +31,15 @@ export default function ReportsPage() {
   
   // Fechas por defecto: últimos 30 días
   const [startDate, setStartDate] = useState(format(subDays(new Date(), 30), 'yyyy-MM-dd'))
-  const [endDate, setEndDate] = useState(format(new Date(), 'yyyy-MM-dd'))
+const [endDate, setEndDate] = useState(
+  format(addDays(new Date(), 1), 'yyyy-MM-dd')
+)
 
   // Datos de reportes
   const [salesReport, setSalesReport] = useState<SalesReport | null>(null)
   const [topProductsReport, setTopProductsReport] = useState<TopProductsReport | null>(null)
   const [branchRevenueReport, setBranchRevenueReport] = useState<BranchRevenueReport | null>(null)
+  const [salesByUserReport, setSalesByUserReport] = useState<any>(null)
 
   useEffect(() => {
     loadBranches()
@@ -80,6 +84,10 @@ export default function ReportsPage() {
             endDate: filters.endDate,
           })
           setBranchRevenueReport(branchesData)
+          break
+        case 'users':
+          const usersData = await reportService.getSalesByUser(filters)
+          setSalesByUserReport(usersData)
           break
       }
     } catch (error) {
@@ -129,7 +137,7 @@ export default function ReportsPage() {
       </div>
 
       {/* Selector de tipo de reporte */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card
           className={`cursor-pointer transition-all ${
             selectedReport === 'sales'
@@ -183,6 +191,25 @@ export default function ReportsPage() {
           <CardContent>
             <p className="text-xs text-muted-foreground">
               Comparativa de ingresos por sucursal
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card
+          className={`cursor-pointer transition-all ${
+            selectedReport === 'users'
+              ? 'border-primary ring-2 ring-primary'
+              : 'hover:border-primary/50'
+          }`}
+          onClick={() => setSelectedReport('users')}
+        >
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Ventas por Usuario</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground">
+              Detalle de ventas por cajero
             </p>
           </CardContent>
         </Card>
@@ -284,6 +311,10 @@ export default function ReportsPage() {
 
       {selectedReport === 'branches' && branchRevenueReport && (
         <BranchRevenueView data={branchRevenueReport} formatCurrency={formatCurrency} />
+      )}
+
+      {selectedReport === 'users' && salesByUserReport && (
+        <SalesByUserView data={salesByUserReport} />
       )}
     </div>
   )

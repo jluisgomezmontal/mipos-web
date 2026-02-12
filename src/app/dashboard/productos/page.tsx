@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Loader2, Plus, Search, Filter, Edit, Trash2 } from 'lucide-react'
+import { Loader2, Plus, Search, Filter, Edit, Trash2, Package } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -196,6 +196,7 @@ export default function ProductsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>Foto</TableHead>
                       <TableHead>SKU</TableHead>
                       <TableHead>Nombre</TableHead>
                       <TableHead>Categoría</TableHead>
@@ -207,6 +208,15 @@ export default function ProductsPage() {
                   <TableBody>
                     {filteredProducts.map((product) => (
                       <TableRow key={product._id}>
+                        <TableCell>
+                          {
+                            product.image ? 
+                          <img src={product.image} alt={product.name} className="w-16 h-16 object-cover rounded" /> : 
+                          <div className="w-16 h-16 bg-muted rounded flex items-center justify-center">
+                            <Package className="w-8 h-8 text-muted-foreground" />
+                          </div>
+                          }
+                        </TableCell>
                         <TableCell className="font-medium">{product.sku}</TableCell>
                         <TableCell>
                           <div>

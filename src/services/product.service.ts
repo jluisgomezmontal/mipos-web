@@ -40,7 +40,7 @@ export const productService = {
   },
 
   async updateProduct(id: string, data: Partial<Omit<Product, '_id' | 'tenantId' | 'createdAt' | 'updatedAt'>>): Promise<{ product: Product }> {
-    const response = await apiClient.put<{ product: Product }>(`/products/${id}`, data)
+    const response = await apiClient.patch<{ product: Product }>(`/products/${id}`, data)
     return response.data!
   },
 
