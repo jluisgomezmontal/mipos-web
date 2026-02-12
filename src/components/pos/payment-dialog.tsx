@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 import {
   Dialog,
@@ -31,13 +31,26 @@ export function PaymentDialog({
   onConfirm,
 }: PaymentDialogProps) {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('CASH')
-  const [amountReceived, setAmountReceived] = useState(total.toString())
+  const [amountReceived, setAmountReceived] = useState('')
   const [isProcessing, setIsProcessing] = useState(false)
+
+  // Resetear el estado cuando se abre el diálogo
+  useEffect(() => {
+    if (open) {
+      setSelectedMethod('CASH')
+      setAmountReceived('')
+      setIsProcessing(false)
+    }
+  }, [open])
 
   const handleConfirm = async () => {
     try {
       setIsProcessing(true)
-      await onConfirm(selectedMethod, parseFloat(amountReceived))
+      // Si es efectivo y no hay monto, usar el total exacto
+      const finalAmount = selectedMethod === 'CASH' && amountReceived 
+        ? parseFloat(amountReceived) 
+        : total
+      await onConfirm(selectedMethod, finalAmount)
       onOpenChange(false)
     } catch (error) {
       // Error ya manejado en el componente padre
@@ -46,7 +59,17 @@ export function PaymentDialog({
     }
   }
 
-  const change = parseFloat(amountReceived) - total
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !isProcessing) {
+      const finalAmount = amountReceived ? parseFloat(amountReceived) : total
+      if (selectedMethod !== 'CASH' || finalAmount >= total) {
+        handleConfirm()
+      }
+    }
+  }
+
+  const numericAmount = amountReceived ? parseFloat(amountReceived) : total
+  const change = numericAmount - total
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -101,11 +124,16 @@ export function PaymentDialog({
                   id="amount"
                   type="number"
                   step="0.01"
+                  placeholder={formatCurrency(total)}
                   value={amountReceived}
                   onChange={(e) => setAmountReceived(e.target.value)}
+                  onKeyPress={handleKeyPress}
                   disabled={isProcessing}
                   autoFocus
                 />
+                <p className="text-xs text-muted-foreground">
+                  Presiona Enter para confirmar o deja vacío para monto exacto
+                </p>
               </div>
 
               {change >= 0 && (
@@ -136,7 +164,7 @@ export function PaymentDialog({
           </Button>
           <Button
             onClick={handleConfirm}
-            disabled={isProcessing || (selectedMethod === 'CASH' && change < 0)}
+            disabled={isProcessing || (selectedMethod === 'CASH' && amountReceived !== '' && change < 0)}
           >
             {isProcessing ? (
               <>

@@ -58,27 +58,27 @@ export default function POSPage() {
     }).format(amount)
   }
 
-  const handleProductSelect = (product: Product) => {
+  const handleProductSelect = (product: Product, quantity: number = 1) => {
     const existingItem = cart.find((item) => item.productId === product._id)
 
     if (existingItem) {
-      updateQuantity(product._id, existingItem.quantity + 1)
+      updateQuantity(product._id, existingItem.quantity + quantity)
     } else {
       const newItem: CartItemData = {
         productId: product._id,
         name: product.name,
         sku: product.sku,
         price: product.price,
-        quantity: 1,
+        quantity: quantity,
         discount: 0,
-        subtotal: product.price,
+        subtotal: product.price * quantity,
       }
       setCart([...cart, newItem])
     }
 
     toast({
       title: 'Producto agregado',
-      description: `${product.name} agregado al carrito`,
+      description: `${quantity > 1 ? `${quantity}x ` : ''}${product.name} agregado al carrito`,
     })
   }
 
@@ -154,8 +154,6 @@ export default function POSPage() {
     try {
       setIsProcessingSale(true)
 
-      const { total } = calculateTotals()
-
       // Crear la venta
       const saleData = {
         branchId: selectedBranch,
@@ -170,11 +168,11 @@ export default function POSPage() {
 
       const { sale } = await saleService.createSale(saleData)
 
-      // Procesar el pago
+      // Procesar el pago con el total exacto de la venta creada
       await saleService.createPayment({
         saleId: sale._id,
         method,
-        amount: total,
+        amount: sale.total,
       })
 
       toast({

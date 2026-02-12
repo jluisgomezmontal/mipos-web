@@ -10,7 +10,7 @@ import { getErrorMessage } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
 
 interface ProductSearchProps {
-  onProductSelect: (product: Product) => void
+  onProductSelect: (product: Product, quantity?: number) => void
 }
 
 export function ProductSearch({ onProductSelect }: ProductSearchProps) {
@@ -24,17 +24,37 @@ export function ProductSearch({ onProductSelect }: ProductSearchProps) {
     try {
       setIsSearching(true)
       
+      // Parsear cantidad si tiene formato: 5*SKU o 5*codigo
+      let quantity = 1
+      let productCode = searchTerm.trim()
+      
+      const quantityMatch = searchTerm.match(/^(\d+)\*(.+)$/)
+      if (quantityMatch) {
+        quantity = parseInt(quantityMatch[1])
+        productCode = quantityMatch[2].trim()
+        
+        if (quantity <= 0) {
+          toast({
+            variant: 'destructive',
+            title: 'Cantidad inválida',
+            description: 'La cantidad debe ser mayor a 0',
+          })
+          setIsSearching(false)
+          return
+        }
+      }
+      
       // Intentar buscar por código de barras primero
       try {
-        const { product } = await productService.getProductByBarcode(searchTerm)
-        onProductSelect(product)
+        const { product } = await productService.getProductByBarcode(productCode)
+        onProductSelect(product, quantity)
         setSearchTerm('')
         return
       } catch {
         // Si no es código de barras, intentar por SKU
         try {
-          const { product } = await productService.getProductBySku(searchTerm)
-          onProductSelect(product)
+          const { product } = await productService.getProductBySku(productCode)
+          onProductSelect(product, quantity)
           setSearchTerm('')
           return
         } catch {
@@ -69,7 +89,7 @@ export function ProductSearch({ onProductSelect }: ProductSearchProps) {
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           type="text"
-          placeholder="Buscar por SKU o código de barras..."
+          placeholder="Ej: 5*SKU123 o código de barras..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           onKeyPress={handleKeyPress}

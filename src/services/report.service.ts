@@ -34,7 +34,7 @@ export const reportService = {
     params.append('startDate', filters.startDate)
     params.append('endDate', filters.endDate)
 
-    const response = await apiClient.get<BranchRevenueReport>(`/reports/branch-revenue?${params.toString()}`)
+    const response = await apiClient.get<BranchRevenueReport>(`/reports/revenue-by-branch?${params.toString()}`)
     return response.data!
   },
 

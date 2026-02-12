@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Loader2, Search, Plus, AlertTriangle, History } from 'lucide-react'
+import { Loader2, Search, Plus, AlertTriangle, History, Settings } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,6 +22,7 @@ import { Inventory } from '@/types/inventory'
 import { Branch } from '@/types/branch'
 import { getErrorMessage } from '@/lib/api-client'
 import { InventoryMovementDialog } from '@/components/inventory/inventory-movement-dialog'
+import { EditStockLimitsDialog } from '@/components/inventory/edit-stock-limits-dialog'
 
 export default function InventoryPage() {
   const router = useRouter()
@@ -33,6 +34,8 @@ export default function InventoryPage() {
   const [selectedBranch, setSelectedBranch] = useState<string>('all')
   const [showLowStock, setShowLowStock] = useState(false)
   const [movementDialog, setMovementDialog] = useState(false)
+  const [editLimitsDialog, setEditLimitsDialog] = useState(false)
+  const [selectedInventory, setSelectedInventory] = useState<Inventory | null>(null)
 
   useEffect(() => {
     loadBranches()
@@ -85,14 +88,55 @@ export default function InventoryPage() {
     }
   }
 
+  const handleEditLimits = (item: Inventory) => {
+    setSelectedInventory(item)
+    setEditLimitsDialog(true)
+  }
+
   const getStockStatus = (item: Inventory) => {
-    if (item.quantity <= item.minStock) {
-      return { label: 'Stock Bajo', variant: 'destructive' as const, icon: true }
+    const { quantity, minStock, maxStock } = item
+    
+    // Validar que minStock y maxStock estén configurados
+    if (minStock === 0 && maxStock === 0) {
+      // Si no hay configuración de stock, usar valores por defecto basados en cantidad
+      if (quantity === 0) {
+        return { label: 'Agotado', variant: 'destructive' as const, icon: true, color: 'text-red-600' }
+      }
+      if (quantity <= 10) {
+        return { label: 'Stock Bajo', variant: 'destructive' as const, icon: true, color: 'text-orange-600' }
+      }
+      if (quantity <= 20) {
+        return { label: 'Por Agotarse', variant: 'outline' as const, icon: true, color: 'text-yellow-600' }
+      }
+      return { label: 'Sin Configurar', variant: 'secondary' as const, icon: false, color: 'text-gray-600' }
     }
-    if (item.quantity >= item.maxStock) {
-      return { label: 'Stock Alto', variant: 'secondary' as const, icon: false }
+    
+    const range = maxStock - minStock
+    // Calcular el porcentaje del stock actual dentro del rango
+    const percentageInRange = ((quantity - minStock) / range) * 100
+    
+    // Crítico: Stock agotado
+    if (quantity === 0) {
+      return { label: 'Agotado', variant: 'destructive' as const, icon: true, color: '' }
     }
-    return { label: 'Normal', variant: 'default' as const, icon: false }
+    
+    // Stock bajo: Menor o igual al mínimo (0% del rango)
+    if (quantity <= minStock) {
+      return { label: 'Stock Bajo', variant: 'destructive' as const, icon: true, color: '' }
+    }
+    
+    // Advertencia: Entre el mínimo y 30% del rango
+    if (percentageInRange <= 30) {
+      return { label: 'Por Agotarse', variant: 'outline' as const, icon: true, color: 'text-yellow-700' }
+    }
+    
+    // Stock alto: Más del 85% del rango
+    if (percentageInRange >= 85) {
+      return { label: 'Stock Alto', variant: 'secondary' as const, icon: false, color: '' }
+    }
+    
+    // Normal: Entre 30% y 85% del rango
+    return { label: 'Normal', variant: 'default' as const, icon: false, color: '' }
   }
 
   const filteredInventory = inventory.filter((item) => {
@@ -219,6 +263,7 @@ export default function InventoryPage() {
                     <TableHead className="text-center">Stock Mínimo</TableHead>
                     <TableHead className="text-center">Stock Máximo</TableHead>
                     <TableHead>Estado</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -252,12 +297,22 @@ export default function InventoryPage() {
                         <TableCell>
                           <div className="flex items-center gap-2">
                             {status.icon && (
-                              <AlertTriangle className="h-4 w-4 text-destructive" />
+                              <AlertTriangle className={`h-4 w-4 ${status.color || 'text-destructive'}`} />
                             )}
-                            <Badge variant={status.variant}>
+                            <Badge variant={status.variant} className={status.color}>
                               {status.label}
                             </Badge>
                           </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditLimits(item)}
+                          >
+                            <Settings className="h-4 w-4 mr-2" />
+                            Configurar
+                          </Button>
                         </TableCell>
                       </TableRow>
                     )
@@ -274,6 +329,13 @@ export default function InventoryPage() {
         onOpenChange={setMovementDialog}
         onSuccess={loadInventory}
         branches={branches}
+      />
+
+      <EditStockLimitsDialog
+        open={editLimitsDialog}
+        onOpenChange={setEditLimitsDialog}
+        inventory={selectedInventory}
+        onSuccess={loadInventory}
       />
     </div>
   )

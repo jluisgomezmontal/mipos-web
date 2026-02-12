@@ -65,4 +65,15 @@ export const inventoryService = {
     )
     return response.data!
   },
+
+  async updateInventory(
+    inventoryId: string,
+    data: { minStock?: number; maxStock?: number }
+  ): Promise<{ inventory: Inventory }> {
+    const response = await apiClient.patch<{ inventory: Inventory }>(
+      `/inventory/${inventoryId}`,
+      data
+    )
+    return response.data!
+  },
 }

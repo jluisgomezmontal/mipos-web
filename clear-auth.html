@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Limpiar Autenticación - MiPOS</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; margin-top: 0; }
+        button {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover { background: #b91c1c; }
+        .success {
+            background: #10b981;
+            color: white;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 20px;
+            display: none;
+        }
+        .info {
+            background: #f0f9ff;
+            border-left: 4px solid #0284c7;
+            padding: 12px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Limpiar Autenticación</h1>
+        
+        <div class="info">
+            <strong>¿Por qué necesitas esto?</strong>
+            <p>Las cookies antiguas están causando problemas de redirección. Este script limpiará completamente tu sesión.</p>
+        </div>
+
+        <button onclick="clearAuth()">Limpiar Todo y Recargar</button>
+        
+        <div class="success" id="success">
+            ✅ Autenticación limpiada. Redirigiendo a login...
+        </div>
+    </div>
+
+    <script>
+        function clearAuth() {
+            // Limpiar localStorage
+            localStorage.clear();
+            
+            // Limpiar sessionStorage
+            sessionStorage.clear();
+            
+            // Limpiar todas las cookies
+            document.cookie.split(";").forEach(function(c) { 
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+            });
+            
+            // Mostrar mensaje de éxito
+            document.getElementById('success').style.display = 'block';
+            
+            // Redirigir después de 2 segundos
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

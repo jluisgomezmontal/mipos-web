@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -32,6 +32,7 @@ import { getErrorMessage } from '@/lib/api-client'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { toast } = useToast()
   const login = useAuthStore((state) => state.login)
   const [isLoading, setIsLoading] = useState(false)
@@ -54,7 +55,9 @@ export default function LoginPage() {
         description: 'Has iniciado sesión exitosamente',
       })
       
-      router.push('/dashboard')
+      // Redirigir a la ruta original o al dashboard
+      const redirectTo = searchParams.get('redirect') || '/dashboard'
+      router.push(redirectTo)
     } catch (error) {
       toast({
         variant: 'destructive',

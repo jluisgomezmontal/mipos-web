@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { format, subDays, startOfMonth, endOfMonth } from 'date-fns'
+import { format, subDays, startOfMonth, endOfMonth, addDays } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Loader2, Calendar, TrendingUp, Package, Building2 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -95,14 +95,15 @@ export default function ReportsPage() {
 
   const setQuickDateRange = (range: 'today' | 'week' | 'month') => {
     const today = new Date()
+    const tomorrow = addDays(today, 1)
     switch (range) {
       case 'today':
         setStartDate(format(today, 'yyyy-MM-dd'))
-        setEndDate(format(today, 'yyyy-MM-dd'))
+        setEndDate(format(tomorrow, 'yyyy-MM-dd'))
         break
       case 'week':
         setStartDate(format(subDays(today, 7), 'yyyy-MM-dd'))
-        setEndDate(format(today, 'yyyy-MM-dd'))
+        setEndDate(format(tomorrow, 'yyyy-MM-dd'))
         break
       case 'month':
         setStartDate(format(startOfMonth(today), 'yyyy-MM-dd'))

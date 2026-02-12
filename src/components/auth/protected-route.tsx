@@ -13,21 +13,17 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const router = useRouter()
-  const { isAuthenticated, user, isLoading } = useAuthStore()
+  const { isAuthenticated, user, isLoading, _hasHydrated } = useAuthStore()
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/login')
+    // Solo redirigir si ya se hidrato el estado y definitivamente no está autenticado
+    if (_hasHydrated && !isLoading && !isAuthenticated) {
+      router.replace('/login')
     }
+  }, [isAuthenticated, isLoading, _hasHydrated, router])
 
-    if (!isLoading && isAuthenticated && allowedRoles && user) {
-      if (!allowedRoles.includes(user.role)) {
-        router.push('/dashboard')
-      }
-    }
-  }, [isAuthenticated, isLoading, user, allowedRoles, router])
-
-  if (isLoading) {
+  // Mostrar loader mientras carga o mientras se hidrata el estado
+  if (isLoading || !_hasHydrated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -35,12 +31,23 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
     )
   }
 
+  // Si no está autenticado, no mostrar nada (el useEffect redirigirá)
   if (!isAuthenticated) {
     return null
   }
 
+  // Si hay roles permitidos y el usuario no tiene el rol correcto
   if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-    return null
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-2">Acceso Denegado</h2>
+          <p className="text-muted-foreground">
+            No tienes permisos para acceder a esta página
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return <>{children}</>

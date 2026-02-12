@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useAuthStore } from '@/store/auth.store'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Package, ShoppingCart, TrendingUp, DollarSign, Loader2 } from 'lucide-react'
@@ -168,7 +169,7 @@ export default function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <a
+            <Link
               href="/dashboard/ventas"
               className="flex items-start space-x-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer"
             >
@@ -179,8 +180,8 @@ export default function DashboardPage() {
                   Abrir punto de venta
                 </p>
               </div>
-            </a>
-            <a
+            </Link>
+            <Link
               href="/dashboard/ventas/historial"
               className="flex items-start space-x-3 p-3 rounded-lg hover:bg-accent transition-colors cursor-pointer"
             >
@@ -191,7 +192,7 @@ export default function DashboardPage() {
                   Historial de ventas
                 </p>
               </div>
-            </a>
+            </Link>
           </CardContent>
         </Card>
       </div>

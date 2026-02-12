@@ -10,6 +10,7 @@ interface AuthState {
   refreshToken: string | null
   isAuthenticated: boolean
   isLoading: boolean
+  _hasHydrated: boolean
   
   login: (credentials: LoginRequest) => Promise<void>
   register: (data: RegisterTenantRequest) => Promise<void>
@@ -18,6 +19,7 @@ interface AuthState {
   setTenant: (tenant: Tenant | null) => void
   setTokens: (accessToken: string, refreshToken: string) => void
   initializeAuth: () => Promise<void>
+  setHasHydrated: (hasHydrated: boolean) => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -29,6 +31,7 @@ export const useAuthStore = create<AuthState>()(
       refreshToken: null,
       isAuthenticated: false,
       isLoading: false,
+      _hasHydrated: false,
 
       login: async (credentials: LoginRequest) => {
         try {
@@ -41,9 +44,10 @@ export const useAuthStore = create<AuthState>()(
             localStorage.setItem('accessToken', tokens.accessToken)
             localStorage.setItem('refreshToken', tokens.refreshToken)
             
-            // Guardar en cookies para el middleware
-            document.cookie = `accessToken=${tokens.accessToken}; path=/; max-age=${60 * 15}; SameSite=Lax`
-            document.cookie = `refreshToken=${tokens.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+            // Guardar en cookies para el middleware (7 días para ambos)
+            const maxAge = 60 * 60 * 24 * 7 // 7 días
+            document.cookie = `accessToken=${tokens.accessToken}; path=/; max-age=${maxAge}; SameSite=Lax`
+            document.cookie = `refreshToken=${tokens.refreshToken}; path=/; max-age=${maxAge}; SameSite=Lax`
           }
 
           set({
@@ -71,9 +75,10 @@ export const useAuthStore = create<AuthState>()(
             localStorage.setItem('accessToken', tokens.accessToken)
             localStorage.setItem('refreshToken', tokens.refreshToken)
             
-            // Guardar en cookies para el middleware
-            document.cookie = `accessToken=${tokens.accessToken}; path=/; max-age=${60 * 15}; SameSite=Lax`
-            document.cookie = `refreshToken=${tokens.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+            // Guardar en cookies para el middleware (7 días para ambos)
+            const maxAge = 60 * 60 * 24 * 7 // 7 días
+            document.cookie = `accessToken=${tokens.accessToken}; path=/; max-age=${maxAge}; SameSite=Lax`
+            document.cookie = `refreshToken=${tokens.refreshToken}; path=/; max-age=${maxAge}; SameSite=Lax`
           }
 
           set({
@@ -121,9 +126,10 @@ export const useAuthStore = create<AuthState>()(
           localStorage.setItem('accessToken', accessToken)
           localStorage.setItem('refreshToken', refreshToken)
           
-          // Guardar en cookies para el middleware
-          document.cookie = `accessToken=${accessToken}; path=/; max-age=${60 * 15}; SameSite=Lax`
-          document.cookie = `refreshToken=${refreshToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+          // Guardar en cookies para el middleware (7 días para ambos)
+          const maxAge = 60 * 60 * 24 * 7 // 7 días
+          document.cookie = `accessToken=${accessToken}; path=/; max-age=${maxAge}; SameSite=Lax`
+          document.cookie = `refreshToken=${refreshToken}; path=/; max-age=${maxAge}; SameSite=Lax`
         }
         set({ accessToken, refreshToken })
       },
@@ -141,6 +147,10 @@ export const useAuthStore = create<AuthState>()(
           }
         }
       },
+
+      setHasHydrated: (hasHydrated: boolean) => {
+        set({ _hasHydrated: hasHydrated })
+      },
     }),
     {
       name: 'auth-storage',
@@ -151,6 +161,9 @@ export const useAuthStore = create<AuthState>()(
         refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
       }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true)
+      },
     }
   )
 )

@@ -21,6 +21,7 @@ import { useAuthStore } from '@/store/auth.store'
 import { saleService } from '@/services/sale.service'
 import { Sale, SaleStatus } from '@/types/sale'
 import { getErrorMessage } from '@/lib/api-client'
+import { SaleDetailsDialog } from '@/components/sales/sale-details-dialog'
 
 export default function SalesHistoryPage() {
   const { toast } = useToast()
@@ -30,6 +31,8 @@ export default function SalesHistoryPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedSale, setSelectedSale] = useState<Sale | null>(null)
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false)
 
   useEffect(() => {
     loadSales()
@@ -163,11 +166,8 @@ export default function SalesHistoryPage() {
                             variant="ghost"
                             size="sm"
                             onClick={() => {
-                              // Aquí podrías abrir un modal con los detalles
-                              toast({
-                                title: 'Detalles de venta',
-                                description: `Venta #${sale.saleNumber}`,
-                              })
+                              setSelectedSale(sale)
+                              setShowDetailsDialog(true)
                             }}
                           >
                             <Eye className="h-4 w-4 mr-2" />
@@ -209,6 +209,13 @@ export default function SalesHistoryPage() {
           )}
         </CardContent>
       </Card>
+
+      <SaleDetailsDialog
+        sale={selectedSale}
+        open={showDetailsDialog}
+        onOpenChange={setShowDetailsDialog}
+        formatCurrency={formatCurrency}
+      />
     </div>
   )
 }
