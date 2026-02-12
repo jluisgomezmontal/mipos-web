@@ -14,10 +14,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { LogOut, User, Moon, Sun } from 'lucide-react'
+import { LogOut, User, Moon, Sun, Menu } from 'lucide-react'
 import { useTheme } from 'next-themes'
 
-export function Header() {
+interface HeaderProps {
+  onMenuClick?: () => void
+}
+
+export function Header({ onMenuClick }: HeaderProps) {
   const router = useRouter()
   const { user, tenant, logout } = useAuthStore()
   const { theme, setTheme, resolvedTheme } = useTheme()
@@ -43,11 +47,20 @@ export function Header() {
   }
 
   const currentTheme = resolvedTheme || theme || 'light'
-  const logoSrc = currentTheme === 'dark' ? '/images/icon d.png' : '/images/icon w.png'
+  const logoSrc = currentTheme !== 'dark' ? '/images/icon d.png' : '/images/icon.png'
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-16 items-center px-6 gap-4">
+      <div className="flex h-16 items-center px-4 md:px-6 gap-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          onClick={onMenuClick}
+        >
+          <Menu className="h-5 w-5" />
+          <span className="sr-only">Abrir menú</span>
+        </Button>
         <div className="flex-1 flex items-center gap-4">
           <Link href="/dashboard" className="flex items-center gap-1 md:hidden group">
             <div className="relative w-8 h-8 flex-shrink-0">

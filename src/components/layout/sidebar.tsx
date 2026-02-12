@@ -26,6 +26,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet'
 
 interface NavItem {
   title: string
@@ -85,7 +91,12 @@ const navItems: NavItem[] = [
   },
 ]
 
-export function Sidebar() {
+interface SidebarProps {
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+}
+
+export function Sidebar({ open, onOpenChange }: SidebarProps) {
   const pathname = usePathname()
   const user = useAuthStore((state) => state.user)
   const { theme, resolvedTheme } = useTheme()
@@ -98,13 +109,8 @@ export function Sidebar() {
   const currentTheme = resolvedTheme || theme || 'light'
   const logoSrc = currentTheme !== 'dark' ? '/images/icon d.png' : '/images/icon.png'
 
-  return (
-    <aside 
-      className={cn(
-        "hidden md:flex flex-col border-r bg-card transition-all duration-300 ease-in-out",
-        isCollapsed ? "w-20" : "w-64"
-      )}
-    >
+  const SidebarContent = () => (
+    <>
       <div className={cn(
         " transition-all duration-300",
         isCollapsed ? "p-4" : "p-6"
@@ -115,6 +121,7 @@ export function Sidebar() {
             "flex items-center group",
             isCollapsed ? "justify-center gap-0" : "gap-1"
           )}
+          onClick={() => onOpenChange?.(false)}
         >
           <div className="relative w-10 h-10 flex-shrink-0">
             <Image
@@ -158,6 +165,7 @@ export function Sidebar() {
                     ? 'bg-primary text-primary-foreground shadow-sm'
                     : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                 )}
+                onClick={() => onOpenChange?.(false)}
               >
                 <Icon className={cn(
                   "flex-shrink-0 transition-all",
@@ -189,27 +197,52 @@ export function Sidebar() {
           })}
         </TooltipProvider>
       </nav>
+    </>
+  )
 
-      <div className={cn(
-        "border-t p-2 transition-all duration-300",
-        isCollapsed ? "flex justify-center" : "flex justify-end"
-      )}>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="h-9 w-9 transition-transform hover:scale-110"
-        >
-          {isCollapsed ? (
-            <ChevronRight className="h-5 w-5" />
-          ) : (
-            <ChevronLeft className="h-5 w-5" />
-          )}
-          <span className="sr-only">
-            {isCollapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
-          </span>
-        </Button>
-      </div>
-    </aside>
+  return (
+    <>
+      {/* Mobile Sidebar */}
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent side="left" className="w-64 p-0">
+          <SheetHeader className="sr-only">
+            <SheetTitle>Menú de navegación</SheetTitle>
+          </SheetHeader>
+          <div className="flex flex-col h-full">
+            <SidebarContent />
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Desktop Sidebar */}
+      <aside 
+        className={cn(
+          "hidden md:flex flex-col border-r bg-card transition-all duration-300 ease-in-out",
+          isCollapsed ? "w-20" : "w-64"
+        )}
+      >
+        <SidebarContent />
+        <div className={cn(
+          "border-t p-2 transition-all duration-300",
+          isCollapsed ? "flex justify-center" : "flex justify-end"
+        )}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="h-9 w-9 transition-transform hover:scale-110"
+          >
+            {isCollapsed ? (
+              <ChevronRight className="h-5 w-5" />
+            ) : (
+              <ChevronLeft className="h-5 w-5" />
+            )}
+            <span className="sr-only">
+              {isCollapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
+            </span>
+          </Button>
+        </div>
+      </aside>
+    </>
   )
 }
