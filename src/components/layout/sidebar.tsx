@@ -19,6 +19,8 @@ import {
   MapPin,
   ChevronLeft,
   ChevronRight,
+  User,
+  Building2,
 } from 'lucide-react'
 import {
   Tooltip,
@@ -45,49 +47,55 @@ const navItems: NavItem[] = [
     title: 'Dashboard',
     href: '/dashboard',
     icon: LayoutDashboard,
-    roles: ['OWNER', 'ADMIN', 'CASHIER'],
+    roles: ['OWNER', 'ADMIN', 'CASHIER', 'SUPERUSER'],
   },
   {
     title: 'Ventas',
     href: '/dashboard/ventas',
     icon: ShoppingCart,
-    roles: ['OWNER', 'ADMIN', 'CASHIER'],
+    roles: ['OWNER', 'ADMIN', 'CASHIER', 'SUPERUSER'],
   },
   {
     title: 'Inventario',
     href: '/dashboard/inventario',
     icon: Store,
-    roles: ['OWNER', 'ADMIN'],
+    roles: ['OWNER', 'ADMIN', 'SUPERUSER'],
   },
   {
     title: 'Productos',
     href: '/dashboard/productos',
     icon: Package,
-    roles: ['OWNER', 'ADMIN'],
+    roles: ['OWNER', 'ADMIN', 'SUPERUSER'],
   },
   {
     title: 'Sucursales',
     href: '/dashboard/sucursales',
     icon: MapPin,
-    roles: ['OWNER'],
+    roles: ['OWNER', 'SUPERUSER'],
   },
   {
     title: 'Reportes',
     href: '/dashboard/reportes',
     icon: BarChart3,
-    roles: ['OWNER', 'ADMIN'],
+    roles: ['OWNER', 'ADMIN', 'SUPERUSER'],
   },
   {
     title: 'Usuarios',
     href: '/dashboard/usuarios',
     icon: Users,
-    roles: ['OWNER'],
+    roles: ['OWNER', 'SUPERUSER'],
+  },
+  {
+    title: 'Administrar Negocios',
+    href: '/dashboard/administrar-negocios',
+    icon: Building2,
+    roles: ['SUPERUSER'],
   },
   {
     title: 'Configuración',
     href: '/dashboard/configuracion',
     icon: Settings,
-    roles: ['OWNER'],
+    roles: ['OWNER', 'SUPERUSER'],
   },
 ]
 
@@ -99,6 +107,7 @@ interface SidebarProps {
 export function Sidebar({ open, onOpenChange }: SidebarProps) {
   const pathname = usePathname()
   const user = useAuthStore((state) => state.user)
+  console.log(User);
   const { theme, resolvedTheme } = useTheme()
   const [isCollapsed, setIsCollapsed] = useState(false)
 

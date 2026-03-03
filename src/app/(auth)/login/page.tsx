@@ -49,12 +49,12 @@ function LoginForm() {
     try {
       setIsLoading(true)
       await login(data)
-      
+
       toast({
         title: '¡Bienvenido!',
         description: 'Has iniciado sesión exitosamente',
       })
-      
+
       // Redirigir a la ruta original o al dashboard
       const redirectTo = searchParams.get('redirect') || '/dashboard'
       router.push(redirectTo)
@@ -147,10 +147,10 @@ function LoginForm() {
           <div className="text-sm text-center text-muted-foreground">
             ¿No tienes una cuenta?{' '}
             <Link
-              href="/registro"
+              href="tel:+527444292283"
               className="text-primary hover:underline font-medium"
             >
-              Registra tu negocio
+              Contacta a tu administrador
             </Link>
           </div>
         </CardFooter>

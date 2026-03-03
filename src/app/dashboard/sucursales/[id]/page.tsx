@@ -22,6 +22,7 @@ import { useToast } from '@/hooks/use-toast'
 import { branchService } from '@/services/branch.service'
 import { branchSchema, BranchFormData } from '@/lib/validations/branch'
 import { getErrorMessage } from '@/lib/api-client'
+import { StateSelect } from '@/components/ui/state-select'
 
 export default function EditBranchPage() {
   const router = useRouter()
@@ -39,12 +40,9 @@ export default function EditBranchPage() {
         street: '',
         city: '',
         state: '',
-        country: '',
         zipCode: '',
       },
       phone: '',
-      email: '',
-      manager: '',
       isActive: true,
     },
   })
@@ -66,12 +64,9 @@ export default function EditBranchPage() {
           street: branch.address?.street || '',
           city: branch.address?.city || '',
           state: branch.address?.state || '',
-          country: branch.address?.country || '',
           zipCode: branch.address?.zipCode || '',
         },
         phone: branch.phone || '',
-        email: branch.email || '',
-        manager: branch.manager || '',
         isActive: branch.isActive,
       })
     } catch (error) {
@@ -97,15 +92,12 @@ export default function EditBranchPage() {
       }
 
       if (data.phone?.trim()) cleanData.phone = data.phone
-      if (data.email?.trim()) cleanData.email = data.email
-      if (data.manager?.trim()) cleanData.manager = data.manager
 
-      if (data.address && (data.address.street || data.address.city || data.address.state || data.address.country || data.address.zipCode)) {
+      if (data.address && (data.address.street || data.address.city || data.address.state || data.address.zipCode)) {
         cleanData.address = {}
         if (data.address.street?.trim()) cleanData.address.street = data.address.street
         if (data.address.city?.trim()) cleanData.address.city = data.address.city
         if (data.address.state?.trim()) cleanData.address.state = data.address.state
-        if (data.address.country?.trim()) cleanData.address.country = data.address.country
         if (data.address.zipCode?.trim()) cleanData.address.zipCode = data.address.zipCode
       }
       
@@ -252,10 +244,11 @@ export default function EditBranchPage() {
                       <FormItem>
                         <FormLabel>Estado</FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder="Estado"
+                          <StateSelect
+                            value={field.value}
+                            onValueChange={field.onChange}
                             disabled={isLoading}
-                            {...field}
+                            placeholder="Selecciona un estado..."
                           />
                         </FormControl>
                         <FormMessage />
@@ -281,24 +274,6 @@ export default function EditBranchPage() {
                     )}
                   />
                 </div>
-
-                <FormField
-                  control={form.control}
-                  name="address.country"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>País</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="País"
-                          disabled={isLoading}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -319,45 +294,7 @@ export default function EditBranchPage() {
                     </FormItem>
                   )}
                 />
-
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="email"
-                          placeholder="sucursal@ejemplo.com"
-                          disabled={isLoading}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
-
-              <FormField
-                control={form.control}
-                name="manager"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Encargado</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Nombre del encargado"
-                        disabled={isLoading}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               <FormField
                 control={form.control}
                 name="isActive"
