@@ -9,6 +9,7 @@ export interface SaleItem {
     price: number
     cost: number
     taxRate: number
+    imageUrl?: string
   }
   quantity: number
   unitPrice: number

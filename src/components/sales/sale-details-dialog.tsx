@@ -2,6 +2,7 @@
 
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import Image from 'next/image'
 import {
   Dialog,
   DialogContent,
@@ -20,6 +21,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Sale, SaleStatus } from '@/types/sale'
+import { Package } from 'lucide-react'
 
 interface SaleDetailsDialogProps {
   sale: Sale | null
@@ -86,6 +88,7 @@ export function SaleDetailsDialog({
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-16"></TableHead>
                     <TableHead>Producto</TableHead>
                     <TableHead>SKU</TableHead>
                     <TableHead className="text-right">Precio Unit.</TableHead>
@@ -95,8 +98,29 @@ export function SaleDetailsDialog({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sale.items.map((item, index) => (
+                  {sale.items.map((item, index) => {
+                    console.log('Product snapshot:', item.productSnapshot)
+                    return (
                     <TableRow key={index}>
+                      <TableCell>
+                        <div className="relative w-12 h-12 rounded-md overflow-hidden bg-muted flex items-center justify-center">
+                          {item.productSnapshot.imageUrl ? (
+                            <Image
+                              src={item.productSnapshot.imageUrl}
+                              alt={item.productSnapshot.name}
+                              fill
+                              className="object-cover"
+                              sizes="48px"
+                              onError={(e) => {
+                                console.error('Error loading image:', item.productSnapshot.imageUrl)
+                                e.currentTarget.style.display = 'none'
+                              }}
+                            />
+                          ) : (
+                            <Package className="h-6 w-6 text-muted-foreground" />
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell className="font-medium">
                         {item.productSnapshot.name}
                       </TableCell>
@@ -114,7 +138,7 @@ export function SaleDetailsDialog({
                         {formatCurrency(item.total)}
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )})}
                 </TableBody>
               </Table>
             </div>
