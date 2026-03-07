@@ -21,6 +21,7 @@ import {
   ChevronRight,
   User,
   Building2,
+  Calculator,
 } from 'lucide-react'
 import {
   Tooltip,
@@ -56,6 +57,12 @@ const navItems: NavItem[] = [
     roles: ['OWNER', 'ADMIN', 'CASHIER', 'SUPERUSER'],
   },
   {
+    title: 'Corte de Caja',
+    href: '/dashboard/corte-caja',
+    icon: Calculator,
+    roles: ['OWNER', 'ADMIN', 'CASHIER', 'SUPERUSER'],
+  },
+  {
     title: 'Inventario',
     href: '/dashboard/inventario',
     icon: Store,
@@ -88,6 +95,12 @@ const navItems: NavItem[] = [
   {
     title: 'Administrar Negocios',
     href: '/dashboard/administrar-negocios',
+    icon: Building2,
+    roles: ['SUPERUSER'],
+  },
+  {
+    title: 'Tenants',
+    href: '/dashboard/tenants',
     icon: Building2,
     roles: ['SUPERUSER'],
   },

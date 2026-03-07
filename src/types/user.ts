@@ -27,6 +27,7 @@ export interface UpdateUserRequest {
   lastName?: string
   role?: UserRole
   isActive?: boolean
+  password?: string
 }
 
 export interface UsersResponse {
@@ -49,12 +50,14 @@ export interface UserFilters {
 }
 
 export const ROLE_LABELS: Record<UserRole, string> = {
+  SUPERUSER: 'Super Usuario',
   OWNER: 'Propietario',
   ADMIN: 'Administrador',
   CASHIER: 'Cajero',
 }
 
 export const ROLE_DESCRIPTIONS: Record<UserRole, string> = {
+  SUPERUSER: 'Acceso total al sistema multi-tenant',
   OWNER: 'Acceso completo al sistema',
   ADMIN: 'Gestión de operaciones y configuración',
   CASHIER: 'Operación de punto de venta',

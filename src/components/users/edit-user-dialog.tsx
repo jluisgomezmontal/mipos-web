@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Eye, EyeOff } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/button'
 import { updateUserSchema, UpdateUserFormData } from '@/lib/validations/user'
 import { UserListItem, ROLE_LABELS, ROLE_DESCRIPTIONS } from '@/types/user'
 import { UserRole } from '@/types/auth'
+import { useAuthStore } from '@/store/auth.store'
 
 interface EditUserDialogProps {
   open: boolean
@@ -42,6 +43,13 @@ export function EditUserDialog({
   user,
   isLoading = false,
 }: EditUserDialogProps) {
+  const currentUser = useAuthStore((state) => state.user)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [changePassword, setChangePassword] = useState(false)
+
+  const canChangePassword = currentUser?.role === 'OWNER' || currentUser?.role === 'SUPERUSER'
+
   const form = useForm<UpdateUserFormData>({
     resolver: zodResolver(updateUserSchema),
     defaultValues: {
@@ -50,6 +58,8 @@ export function EditUserDialog({
       lastName: '',
       role: 'CASHIER',
       isActive: true,
+      password: '',
+      confirmPassword: '',
     },
   })
 
@@ -61,12 +71,22 @@ export function EditUserDialog({
         lastName: user.lastName,
         role: user.role,
         isActive: user.isActive,
+        password: '',
+        confirmPassword: '',
       })
+      setChangePassword(false)
+      setShowPassword(false)
+      setShowConfirmPassword(false)
     }
   }, [user, open, form])
 
   const handleSubmit = async (data: UpdateUserFormData) => {
-    await onSubmit(data)
+    const submitData = { ...data }
+    if (!changePassword || !submitData.password) {
+      delete submitData.password
+      delete submitData.confirmPassword
+    }
+    await onSubmit(submitData)
   }
 
   const roles: UserRole[] = ['OWNER', 'ADMIN', 'CASHIER']
@@ -190,6 +210,100 @@ export function EditUserDialog({
                 </FormItem>
               )}
             />
+
+            {canChangePassword && (
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="changePassword"
+                    checked={changePassword}
+                    onChange={(e) => {
+                      setChangePassword(e.target.checked)
+                      if (!e.target.checked) {
+                        form.setValue('password', '')
+                        form.setValue('confirmPassword', '')
+                      }
+                    }}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  <label htmlFor="changePassword" className="text-sm font-medium">
+                    Cambiar contraseña
+                  </label>
+                </div>
+
+                {changePassword && (
+                  <div className="space-y-4 rounded-lg border p-4 bg-muted/50">
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nueva Contraseña</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Input
+                                type={showPassword ? 'text' : 'password'}
+                                placeholder="••••••••"
+                                autoComplete="new-password"
+                                {...field}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                              >
+                                {showPassword ? (
+                                  <EyeOff className="h-4 w-4" />
+                                ) : (
+                                  <Eye className="h-4 w-4" />
+                                )}
+                              </button>
+                            </div>
+                          </FormControl>
+                          <FormDescription>
+                            Mínimo 8 caracteres, debe incluir mayúsculas, minúsculas y números
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Confirmar Nueva Contraseña</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Input
+                                type={showConfirmPassword ? 'text' : 'password'}
+                                placeholder="••••••••"
+                                autoComplete="new-password"
+                                {...field}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                              >
+                                {showConfirmPassword ? (
+                                  <EyeOff className="h-4 w-4" />
+                                ) : (
+                                  <Eye className="h-4 w-4" />
+                                )}
+                              </button>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
 
             <DialogFooter>
               <Button

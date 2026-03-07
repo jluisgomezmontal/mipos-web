@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Loader2, ShoppingCart, Trash2 } from 'lucide-react'
+import { Loader2, ShoppingCart, Trash2, Calculator, AlertCircle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useToast } from '@/hooks/use-toast'
 import { useAuthStore } from '@/store/auth.store'
 import { ProductSearch } from '@/components/pos/product-search'
@@ -14,25 +15,48 @@ import { Product } from '@/types/product'
 import { PaymentMethod } from '@/types/sale'
 import { saleService } from '@/services/sale.service'
 import { branchService } from '@/services/branch.service'
+import { cashRegisterService } from '@/services/cashRegister.service'
 import { getErrorMessage } from '@/lib/api-client'
 import { Branch } from '@/types/branch'
+import { CashRegisterClosing } from '@/types/cash-register'
 import useF1 from '@/hooks/use-f1'
+import Link from 'next/link'
 
 export default function POSPage() {
   const router = useRouter()
   const { toast } = useToast()
-  const { tenant } = useAuthStore()
+  const { tenant, user } = useAuthStore()
   const [cart, setCart] = useState<CartItemData[]>([])
   const [branches, setBranches] = useState<Branch[]>([])
   const [selectedBranch, setSelectedBranch] = useState<string>('')
   const [isLoadingBranches, setIsLoadingBranches] = useState(true)
   const [showPaymentDialog, setShowPaymentDialog] = useState(false)
   const [isProcessingSale, setIsProcessingSale] = useState(false)
+  const [currentRegister, setCurrentRegister] = useState<CashRegisterClosing | null>(null)
+  const [isLoadingRegister, setIsLoadingRegister] = useState(true)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     loadBranches()
+    checkOpenRegister()
   }, [])
+
+  const checkOpenRegister = async () => {
+    if (user?.role !== 'CASHIER') {
+      setIsLoadingRegister(false)
+      return
+    }
+
+    try {
+      setIsLoadingRegister(true)
+      const response = await cashRegisterService.getCurrentOpenRegister()
+      setCurrentRegister(response.data?.cashRegister || null)
+    } catch (error) {
+      console.error('Error checking register:', error)
+    } finally {
+      setIsLoadingRegister(false)
+    }
+  }
 
   const loadBranches = async () => {
     try {
@@ -247,6 +271,22 @@ export default function POSPage() {
           </select>
         </div>
       </div>
+
+      {user?.role === 'CASHIER' && !isLoadingRegister && !currentRegister && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Turno no abierto</AlertTitle>
+          <AlertDescription className="flex items-center justify-between">
+            <span>Debes abrir un turno en Corte de Caja antes de realizar ventas.</span>
+            <Link href="/dashboard/corte-caja">
+              <Button variant="outline" size="sm" className="ml-4">
+                <Calculator className="h-4 w-4 mr-2" />
+                Ir a Corte de Caja
+              </Button>
+            </Link>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 overflow-hidden">
         <div className="lg:col-span-2 space-y-4">
