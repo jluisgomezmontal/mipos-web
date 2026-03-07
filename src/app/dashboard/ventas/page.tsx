@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Loader2, ShoppingCart, Trash2, Calculator, AlertCircle } from 'lucide-react'
+import { Loader2, ShoppingCart, Trash2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useToast } from '@/hooks/use-toast'
 import { useAuthStore } from '@/store/auth.store'
 import { ProductSearch } from '@/components/pos/product-search'
@@ -20,7 +19,6 @@ import { getErrorMessage } from '@/lib/api-client'
 import { Branch } from '@/types/branch'
 import { CashRegisterClosing } from '@/types/cash-register'
 import useF1 from '@/hooks/use-f1'
-import Link from 'next/link'
 
 export default function POSPage() {
   const router = useRouter()
@@ -37,16 +35,20 @@ export default function POSPage() {
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    loadBranches()
     checkOpenRegister()
   }, [])
 
-  const checkOpenRegister = async () => {
-    if (user?.role !== 'CASHIER') {
-      setIsLoadingRegister(false)
-      return
+  useEffect(() => {
+    if (currentRegister) {
+      // Si hay turno abierto, usar la sucursal del turno
+      setSelectedBranch(currentRegister.branchId._id)
+      setIsLoadingBranches(false)
+    } else {
+      setIsLoadingBranches(false)
     }
+  }, [currentRegister, user])
 
+  const checkOpenRegister = async () => {
     try {
       setIsLoadingRegister(true)
       const response = await cashRegisterService.getCurrentOpenRegister()
@@ -227,7 +229,7 @@ export default function POSPage() {
 
   const { subtotal, tax, total } = calculateTotals()
 
-  if (isLoadingBranches) {
+  if (isLoadingBranches || isLoadingRegister) {
     return (
       <div className="flex items-center justify-center h-full">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -235,19 +237,19 @@ export default function POSPage() {
     )
   }
 
-  if (branches.length === 0) {
+  // Validar que el usuario tenga un turno abierto
+  if (!currentRegister) {
     return (
       <div className="flex flex-col items-center justify-center h-full space-y-4">
         <p className="text-lg text-muted-foreground">
-          No hay sucursales disponibles
+          No hay turno abierto
         </p>
         <p className="text-sm text-muted-foreground">
-          Crea una sucursal para comenzar a vender
+          Abre un turno en Corte de Caja para comenzar a vender
         </p>
       </div>
     )
   }
-
   return (
     <div className="h-full flex flex-col space-y-4">
       <div className="flex items-center justify-between">
@@ -258,35 +260,26 @@ export default function POSPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <select
-            value={selectedBranch}
-            onChange={(e) => setSelectedBranch(e.target.value)}
-            className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            {branches.map((branch) => (
-              <option key={branch._id} value={branch._id}>
-                {branch.name}
-              </option>
-            ))}
-          </select>
+          {currentRegister ? (
+            <div className="h-10 rounded-md border border-input bg-muted px-3 py-2 text-sm flex items-center">
+              <span className="font-medium">{currentRegister.branchId.name}</span>
+              <span className="ml-2 text-xs text-muted-foreground">(Sucursal del turno)</span>
+            </div>
+          ) : (
+            <select
+              value={selectedBranch}
+              onChange={(e) => setSelectedBranch(e.target.value)}
+              className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {branches.map((branch) => (
+                <option key={branch._id} value={branch._id}>
+                  {branch.name}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
       </div>
-
-      {user?.role === 'CASHIER' && !isLoadingRegister && !currentRegister && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Turno no abierto</AlertTitle>
-          <AlertDescription className="flex items-center justify-between">
-            <span>Debes abrir un turno en Corte de Caja antes de realizar ventas.</span>
-            <Link href="/dashboard/corte-caja">
-              <Button variant="outline" size="sm" className="ml-4">
-                <Calculator className="h-4 w-4 mr-2" />
-                Ir a Corte de Caja
-              </Button>
-            </Link>
-          </AlertDescription>
-        </Alert>
-      )}
 
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4 overflow-hidden">
         <div className="lg:col-span-2 space-y-4">
