@@ -75,7 +75,9 @@ export function CloseRegisterDialog({
     try {
       setIsLoadingSummary(true)
       const response = await cashRegisterService.getClosingSummary(cashRegisterId)
-      setSummary(response.data.summary)
+      if (response.data?.summary) {
+        setSummary(response.data.summary)
+      }
     } catch (error) {
       toast({
         variant: 'destructive',

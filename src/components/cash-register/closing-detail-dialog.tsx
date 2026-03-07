@@ -38,7 +38,9 @@ export function ClosingDetailDialog({ open, onOpenChange, closingId }: ClosingDe
     try {
       setIsLoading(true)
       const response = await cashRegisterService.getClosingById(closingId)
-      setDetail(response.data)
+      if (response.data) {
+        setDetail(response.data)
+      }
     } catch (error) {
       toast({
         variant: 'destructive',

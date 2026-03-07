@@ -14,6 +14,7 @@ export function UserRoleBadge({ role, className }: UserRoleBadgeProps) {
     OWNER: 'default',
     ADMIN: 'secondary',
     CASHIER: 'outline',
+    SUPERUSER: 'default',
   }
 
   return (
