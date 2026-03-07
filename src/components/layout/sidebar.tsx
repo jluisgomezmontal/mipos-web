@@ -194,7 +194,7 @@ export function Sidebar({ open, onOpenChange }: SidebarProps) {
                   isCollapsed ? "h-5 w-5" : "h-5 w-5"
                 )} />
                 <span className={cn(
-                  "overflow-hidden transition-all duration-300",
+                  "overflow-hidden transition-all duration-300 whitespace-nowrap",
                   isCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"
                 )}>
                   {item.title}
